@@ -14,7 +14,11 @@ export interface ITrack {
 interface IState {
   track: ITrack | null
   trackFeatures: {} | null
-  trackAnalysis: {} | null
+  trackAnalysis: {
+    segments: Array<{
+      confidence: number
+    }>
+  } | null
 }
 export default class Track extends React.Component<{}, IState> {
   chartRef;
@@ -39,7 +43,7 @@ export default class Track extends React.Component<{}, IState> {
     }
     
   }
-  state = {
+  state: IState = {
     track: null,
     trackFeatures: null,
     trackAnalysis: null,
@@ -86,7 +90,7 @@ export default class Track extends React.Component<{}, IState> {
         .selectAll('rect')
         .data(confidenceArr)
         .style('fill', '#fe9922')
-        .attr('x', (d,i) => i * 5)
+        .attr('x', (_,i) => i * 5)
         .attr('y', d => 300 - yScale(d))
         .attr('height', d => yScale(d))
         .attr('width', 5)
