@@ -9,6 +9,8 @@ export interface ITrack {
   album: {
     images: Array<{ url: string }>
   }
+  preview_url: string
+  artists: Array<{ name: string }>
 }
 
 interface IState {

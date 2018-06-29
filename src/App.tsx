@@ -4,22 +4,10 @@ var Spotify = require('spotify-web-api-js');
 const spotifyApi = new Spotify();
 // import logo from './logo.svg';
 // import { of } from 'rxjs/observable/of';
+import TrackBox from './components/TrackBox';
+import * as qs from 'qs';
 import { ITrack } from './Track';
 
-
-interface ITrackBoxProps {
-  track: ITrack
-  onClick?: (track: ITrack) => void
-}
-const TrackBox: React.SFC<ITrackBoxProps> = props => {
-  const mainImage = props.track.album.images[0]
-  return (
-    <div style={{ padding: 16 }} onClick={() => props.onClick(props.track)}>
-      {mainImage && <img src={mainImage.url} height={160} />}
-      <div>{props.track.name}</div>
-    </div>
-  )
-}
 
 interface IArtistBox {
   artist: {
@@ -52,34 +40,27 @@ interface IState {
   relatedArtistMap: {}
   selectedArtist: {
     artistId: string
-    tracks: Array<{
-      id: string
-      name: string
-      album: {
-        images: Array<{ url: string }>
-      }
-      artists: Array<{ name: string }>
-    }>
+    tracks: ITrack[]
   } | null
   selectedTrack: {
     id: string
   } | null
 }
 class App extends React.Component<any, IState> {
-  getHashParams() {
-    var hashParams = {};
-    var e, r = /([^&;=]+)=?([^&;]*)/g,
-        q = window.location.hash.substring(1);
-    e = r.exec(q)
-    while (e) {
-       hashParams[e[1]] = decodeURIComponent(e[2]);
-       e = r.exec(q);
-    }
-    return hashParams;
-  }
+  // getHashParams() {
+  //   var hashParams = {};
+  //   var e, r = /([^&;=]+)=?([^&;]*)/g,
+  //       q = window.location.hash.substring(1);
+  //   e = r.exec(q)
+  //   while (e) {
+  //      hashParams[e[1]] = decodeURIComponent(e[2]);
+  //      e = r.exec(q);
+  //   }
+  //   return hashParams;
+  // }
   constructor(props){
     super(props);
-    const params: { access_token?: string } = this.getHashParams();
+    const params: { access_token?: string } = qs.parse(window.location.hash.substr(1));
     const token = params.access_token;
     if (token) {
       spotifyApi.setAccessToken(token);
@@ -122,23 +103,35 @@ class App extends React.Component<any, IState> {
     this.setState({ selectedTrack: track })
   }
   flexWrapStyle: React.CSSProperties = { display: 'flex', flexWrap: 'wrap' }
+  topTabStyle: React.CSSProperties = { width: 200, cursor: 'pointer',  }
   public render() {
     return (
       <div className="App">
+        <div style={{ height: 64, display: 'flex', justifyContent: 'center' }}>
+          <div style={this.topTabStyle} onClick={() => this.setState({ selectedArtist: null })}>
+            Home
+          </div>
+          <div style={this.topTabStyle}
+            onClick={() => {window.location.href = `http://localhost:3000?page=recommendations#access_token=${this.state.accessToken}`}}
+          >
+            Recommendations
+          </div>
+        </div>
         <a href='http://localhost:8888'>Login to Spotify</a>
-        {this.state.selectedTrack &&
-          <a href={`http://localhost:3000#page=track&access_token=${this.state.accessToken}&track_id=${this.state.selectedTrack.id}`}>
-            Go to track
-          </a>
-        }
+        
         {this.state.loggedIn &&
           this.state.selectedArtist ? (
             <div>
               {this.state.selectedArtist.tracks[0].artists[0].name}
               <div style={this.flexWrapStyle}>
                 {this.state.selectedArtist.tracks.map(track => (
-                  <TrackBox key={track.id} track={track} onClick={this.handleTrackClick}/>
+                  <TrackBox key={track.id} accessToken={this.state.accessToken} track={track} onClick={this.handleTrackClick}/>
                 ))}
+                {this.state.selectedTrack &&
+                  <a href={`http://localhost:3000?page=track#access_token=${this.state.accessToken}&track_id=${this.state.selectedTrack.id}`}>
+                    Go to track
+                  </a>
+                }
               </div>
             </div>
           ) : (

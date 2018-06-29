@@ -34,6 +34,7 @@
     "react": "^16.4.1",
     "react-dev-utils": "^5.0.1",
     "react-dom": "^16.4.1",
+    "react-powerplug": "^0.1.6",
     "resolve": "1.6.0",
     "rxjs": "^6.2.1",
     "rxjs-compat": "^6.2.1",
